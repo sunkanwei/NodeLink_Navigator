@@ -1,0 +1,21 @@
+schema_version = "1.0.0"
+
+id = "nodelink_navigator"
+name = "NodeLink Navigator"
+version = "1.9.0"
+tagline = "Highlight and navigate node links with theme-aware colors"
+maintainer = "Sunkanwei"
+type = "add-on"
+blender_version_min = "5.0.0"
+
+license = ["SPDX:GPL-3.0-or-later"]
+website = "https://space.bilibili.com/28036907?spm_id_from=333.33.0.0"
+tags = ["Node", "User Interface"]
+
+[release_notes]
+"1.9.0" = """
+- Theme-aware border colors that read directly from Blender's theme settings.
+- High-saturation highlighting for improved visibility.
+- Added a pie menu to quickly jump between upstream and downstream nodes.
+- Language support for both English and Simplified Chinese (zh_HANS).
+"""
