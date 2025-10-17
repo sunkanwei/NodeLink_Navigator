@@ -7,6 +7,45 @@ from .lang_dict import LANG_DICT
 
 from .colors import get_node_border_color
 
+def _tri_strip_polyline(pts, width):
+    n = len(pts)
+    if n < 2:
+        return None
+    hw = width * 0.5
+    out = []
+    for i in range(n):
+        if i == 0:
+            x0, y0 = pts[0]; x1, y1 = pts[1]
+            tx, ty = x1 - x0, y1 - y0
+        elif i == n - 1:
+            x0, y0 = pts[-2]; x1, y1 = pts[-1]
+            tx, ty = x1 - x0, y1 - y0
+        else:
+            x0, y0 = pts[i - 1]; x1, y1 = pts[i + 1]
+            tx, ty = x1 - x0, y1 - y0
+        L = (tx * tx + ty * ty) ** 0.5 or 1.0
+        nx, ny = -ty / L * hw, tx / L * hw
+        x, y = pts[i]
+        out.extend([(x - nx, y - ny), (x + nx, y + ny)])
+    return out
+
+def _tri_strip_polygon(pts, width):
+    n = len(pts)
+    if n < 3:
+        return None
+    hw = width * 0.5
+    out = []
+    for i in range(n):
+        x0, y0 = pts[i - 1]
+        x1, y1 = pts[(i + 1) % n]
+        tx, ty = x1 - x0, y1 - y0
+        L = (tx * tx + ty * ty) ** 0.5 or 1.0
+        nx, ny = -ty / L * hw, tx / L * hw
+        x, y = pts[i]
+        out.extend([(x - nx, y - ny), (x + nx, y + ny)])
+    return out
+
+
 line_thickness = 2.0
 
 class StructBase(ctypes.Structure):
@@ -181,20 +220,31 @@ def draw_callback_px(self, context):
     nodes_to_draw = list(self.chain_targets)
     if ultimate_source_node: nodes_to_draw.append(ultimate_source_node)
     if nodes_to_draw:
-        gpu.state.line_width_set(max(1, 2 * ui))
         for nd in nodes_to_draw:
             if nd and nd.bl_idname != 'NodeReroute':
-                l,b,r,t = get_node_bounds_px(nd,v2d,ui)
+                l,b,r,t = get_node_bounds_px(nd, v2d, ui)
                 col = get_node_border_color(nd, self._color_cache)
-                verts = rounded_rect(l,b,r,t,10)
+                verts = rounded_rect(l, b, r, t, 10)
                 sh.uniform_float("color", col)
-                batch_for_shader(sh, 'LINE_STRIP', {"pos": verts}).draw(sh)
-    gpu.state.line_width_set(line_thickness * ui)
+                if bpy.app.version < (5, 0, 0):
+                    strip = _tri_strip_polygon(verts, 5.0 * ui)
+                    if strip:
+                        batch_for_shader(sh, 'TRI_STRIP', {"pos": strip}).draw(sh)
+                else:
+                    gpu.state.line_width_set(max(1, 2 * ui))
+                    batch_for_shader(sh, 'LINE_STRIP', {"pos": verts}).draw(sh)
     sh.uniform_float("color", (1, 1, 1, 1))
     for lk in self.links_chain:
-        if (verts := bezier_verts_from_link(lk,v2d,ui)):
-            batch_for_shader(sh, 'LINE_STRIP', {"pos": verts}).draw(sh)
+        if (verts := bezier_verts_from_link(lk, v2d, ui)):
+            if bpy.app.version < (5, 0, 0):
+                strip = _tri_strip_polyline(verts, max(3.0, line_thickness * ui))
+                if strip:
+                    batch_for_shader(sh, 'TRI_STRIP', {"pos": strip}).draw(sh)
+            else:
+                gpu.state.line_width_set(line_thickness * ui)
+                batch_for_shader(sh, 'LINE_STRIP', {"pos": verts}).draw(sh)
     gpu.state.blend_set("NONE")
+
 
 
 class CCC_OT_jump_to_node(bpy.types.Operator):

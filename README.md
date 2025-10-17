@@ -1,3 +1,8 @@
+**Version:** 1.9.1  
+**Author:** Sunkanwei  
+**License:** GPL-3.0-or-later  
+**Blender Support:** 4.5 – 5.0+
+
 # NodeLink Navigator
 
 Highlight node categories with theme-aware colors and quickly navigate between connected nodes across Shader, Geometry, and Compositor editors.
@@ -43,7 +48,7 @@ README.md
 
 ## Troubleshooting
 - If borders look misaligned at extreme UI scales, ensure you are in the Node Editor **Window** region; the add-on draws in `POST_PIXEL` and respects `ui_scale`.
-- If nothing happens on `C`, confirm you are in the Node Editor and the add-on is enabled.
+- Press Alt + C (default) to activate the link highlighter.
 
 ## Building / Validation (optional)
 ```bash

@@ -1,16 +1,17 @@
 bl_info = {
     "name": "NodeLink Navigator",
     "author": "Sunkanwei",
-    "version": (1, 9, 0),
-    "blender": (5, 0, 0),
-    "location": "Node Editor  •  Press 'C'",
+    "version": (1, 9, 1),
+    "blender": (4, 5, 0),
+    "location": "Node Editor • Shortcut: Alt + C (user-configurable)",
     "description": "Highlight node categories using theme-aware colors and jump between connected nodes.",
-    "doc_url": "",
-    "tracker_url": "",
-    "license": "GPL-3.0-or-later", 
+    "doc_url": "https://github.com/sunkanwei/NodeLink_Navigator",
+    "tracker_url": "https://github.com/sunkanwei/NodeLink_Navigator/issues",
+    "license": "GPL-3.0-or-later",
     "support": "COMMUNITY",
     "category": "Node",
 }
+
 
 import bpy
 from bpy.types import AddonPreferences
@@ -84,7 +85,7 @@ def register():
     kc = bpy.context.window_manager.keyconfigs.addon
     if kc:
         km = kc.keymaps.new(name='Node Editor', space_type='NODE_EDITOR')
-        kmi = km.keymap_items.new(operators.CCC_OT_modal_link_highlighter.bl_idname, 'C', 'PRESS')
+        kmi = km.keymap_items.new("node.ccc_modal_link_highlighter", type='C', value='PRESS', alt=True)
         addon_keymaps['CCC_MODAL_KEYMAP'] = (km, kmi)
 
 def unregister():
